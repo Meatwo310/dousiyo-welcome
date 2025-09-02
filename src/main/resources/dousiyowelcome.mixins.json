@@ -1,9 +1,9 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "io.github.meatwo310.examplemod.mixin",
+  "package": "io.github.meatwo310.dousiyowelcome.mixin",
   "compatibilityLevel": "JAVA_17",
-  "refmap": "examplemod.refmap.json",
+  "refmap": "dousiyowelcome.refmap.json",
   "mixins": [
   ],
   "client": [
