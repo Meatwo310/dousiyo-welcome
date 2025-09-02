@@ -1,6 +1,6 @@
 package io.github.meatwo310.dousiyowelcome;
 
-import io.github.meatwo310.dousiyowelcome.config.ClientConfig;
+import io.github.meatwo310.dousiyowelcome.client.ClientConfig;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
