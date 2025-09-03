@@ -1,6 +1,10 @@
 {
   "gui.dousiyowelcome.law.title": "名前どうしよ鯖: ルール & 法律",
-  "gui.dousiyowelcome.law.message": "名前どうしよ鯖では、誰もが快適で公平に遊ぶための決まりがあります。\nこのパックをプレイし、サーバーへ接続するには、\n以下のルールと法律をよく読んで同意してください。",
+  "gui.dousiyowelcome.law.message1": "名前どうしよ鯖では、誰もが快適で公平に遊ぶための決まりがあります。",
+  "gui.dousiyowelcome.law.message2": "このパックをプレイし、サーバーへ接続するには、",
+  "gui.dousiyowelcome.law.message3": "以下のルールと法律をよく読んで同意してください。",
+  "gui.dousiyowelcome.law.message4": "",
+  "gui.dousiyowelcome.law.message5": "",
   "gui.dousiyowelcome.law.suggestions": "ブラウザで開く",
   "gui.dousiyowelcome.law.turn_off": "ルールと法律を熟読したので、これに同意します",
   "gui.dousiyowelcome.law.url": "https://valine3gdev.github.io/dousiyo-site/rule.html"

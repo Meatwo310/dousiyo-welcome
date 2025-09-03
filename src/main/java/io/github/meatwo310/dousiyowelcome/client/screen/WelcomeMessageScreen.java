@@ -20,39 +20,42 @@ import org.slf4j.Logger;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
+import java.util.stream.Stream;
 
 // Code yoinked from Twilight Forest, via Supplementaries.
 public class WelcomeMessageScreen extends Screen {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     private final Screen lastScreen;
-    private final Component text;
+    private final List<Component> texts;
     @Nullable
     private final Component url;
     private final Runnable onTurnOff;
     private int ticksUntilEnable;
     private boolean urlOpened;
-    private MultiLineLabel message;
     private MultiLineLabel suggestions;
 
     private Button disableButton;
 
     public WelcomeMessageScreen(Screen screen, int ticksUntilEnable,
-                                Component title, Component text, @Nullable Component url,
+                                Component title, List<Component> texts, @Nullable Component url,
                                 Runnable onTurnOff) {
         super(title);
-        this.message = MultiLineLabel.EMPTY;
         this.suggestions = MultiLineLabel.EMPTY;
         this.lastScreen = screen;
         this.ticksUntilEnable = ticksUntilEnable;
-        this.text = text;
+        this.texts = texts;
         this.url = url;
         this.onTurnOff = onTurnOff;
     }
 
     @Override
     public @NotNull Component getNarrationMessage() {
-        return CommonComponents.joinForNarration(super.getNarrationMessage(), text);
+        return CommonComponents.joinForNarration(Stream.concat(
+                Stream.of(super.getNarrationMessage()),
+                texts.stream()
+        ).toArray(Component[]::new));
     }
 
     @Override
@@ -66,7 +69,6 @@ public class WelcomeMessageScreen extends Screen {
                 }).bounds(this.width / 2 - 155, this.height * 5 / 6, 300, 20).build());
         this.disableButton.active = false;
 
-        this.message = MultiLineLabel.create(this.font, text, this.width - 50);
         this.suggestions = url == null
                 ? MultiLineLabel.EMPTY
                 : MultiLineLabel.create(this.font, url, this.width - 50);
@@ -75,8 +77,11 @@ public class WelcomeMessageScreen extends Screen {
     @Override
     public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(graphics);
-        graphics.drawCenteredString(this.font, this.title, this.width / 2, 30, 16777215);
-        this.message.renderCentered(graphics, this.width / 2, 55);
+
+        graphics.drawCenteredString(this.font, this.title, this.width / 2, 30, 0xffffff);
+        for (int i = 0; i < texts.size(); i++) {
+            graphics.drawCenteredString(this.font, texts.get(i), this.width / 2, 55 + i * 9, 0xffffff);
+        }
         this.suggestions.renderCentered(graphics, this.width / 2, 180);
         super.render(graphics, mouseX, mouseY, partialTicks);
     }
@@ -143,8 +148,13 @@ public class WelcomeMessageScreen extends Screen {
             .withStyle(ChatFormatting.GOLD)
             .withStyle(ChatFormatting.BOLD);
 
-    private static final Component TEXT = Component
-            .translatable("gui.dousiyowelcome.law.message");
+    private static final List<Component> TEXTS = List.of(
+            Component.translatable("gui.dousiyowelcome.law.message1"),
+            Component.translatable("gui.dousiyowelcome.law.message2"),
+            Component.translatable("gui.dousiyowelcome.law.message3"),
+            Component.translatable("gui.dousiyowelcome.law.message4"),
+            Component.translatable("gui.dousiyowelcome.law.message5")
+    );
 
     private static final Component URL = Component
             .translatable("gui.dousiyowelcome.law.suggestions")
@@ -162,7 +172,7 @@ public class WelcomeMessageScreen extends Screen {
                 screen,
                 200,
                 TITLE,
-                TEXT,
+                TEXTS,
                 URL,
                 ClientConfig::agreeToLaw
         );
