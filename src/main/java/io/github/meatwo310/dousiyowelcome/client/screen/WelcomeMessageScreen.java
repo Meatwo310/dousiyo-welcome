@@ -1,7 +1,9 @@
 package io.github.meatwo310.dousiyowelcome.client.screen;
 
+import com.mojang.logging.LogUtils;
 import io.github.meatwo310.dousiyowelcome.client.ClientConfig;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -14,19 +16,26 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 // Code yoinked from Twilight Forest, via Supplementaries.
 public class WelcomeMessageScreen extends Screen {
+    public static final Logger LOGGER = LogUtils.getLogger();
+
     private final Screen lastScreen;
     private final Component text;
     @Nullable
     private final Component url;
     private final Runnable onTurnOff;
     private int ticksUntilEnable;
+    private boolean urlOpened;
     private MultiLineLabel message;
     private MultiLineLabel suggestions;
 
-    private Button disaleButton;
+    private Button disableButton;
 
     public WelcomeMessageScreen(Screen screen, int ticksUntilEnable,
                                 Component title, Component text, @Nullable Component url,
@@ -50,12 +59,12 @@ public class WelcomeMessageScreen extends Screen {
     protected void init() {
         super.init();
 
-        this.disaleButton = this.addRenderableWidget(Button.builder(
+        this.disableButton = this.addRenderableWidget(Button.builder(
                 Component.translatable("gui.dousiyowelcome.law.turn_off"), (pressed) -> {
                     Minecraft.getInstance().setScreen(this.lastScreen);
                     onTurnOff.run();
                 }).bounds(this.width / 2 - 155, this.height * 5 / 6, 300, 20).build());
-        this.disaleButton.active = false;
+        this.disableButton.active = false;
 
         this.message = MultiLineLabel.create(this.font, text, this.width - 50);
         this.suggestions = url == null
@@ -75,14 +84,21 @@ public class WelcomeMessageScreen extends Screen {
     @Override
     public void tick() {
         super.tick();
-        if (--this.ticksUntilEnable <= 0) {
-            this.disaleButton.active = true;
+        if (!this.urlOpened) {
+            return;
+        }
+
+        if (this.ticksUntilEnable > 0) {
+            this.ticksUntilEnable--;
+        }
+        if (this.ticksUntilEnable <= 0) {
+            this.disableButton.active = true;
         }
     }
 
     @Override
     public boolean shouldCloseOnEsc() {
-        return this.ticksUntilEnable <= 0;
+        return false;
     }
 
     @Override
@@ -94,11 +110,20 @@ public class WelcomeMessageScreen extends Screen {
     public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
         if (pMouseY > 180.0 && pMouseY < 190.0 && this.url != null) {
             Style style = this.getClickedComponentStyleAt((int) pMouseX);
-            if (url != null && style != null && style.getClickEvent() != null
-                    && style.getClickEvent().getAction() == ClickEvent.Action.OPEN_URL
-            ) {
-                this.handleComponentClicked(style);
-                return false;
+            if (url != null && style != null) {
+                ClickEvent clickEvent = style.getClickEvent();
+                if (clickEvent != null && clickEvent.getAction() == ClickEvent.Action.OPEN_URL) {
+                    String value = clickEvent.getValue();
+                    LOGGER.info("Opening url: {}", value);
+                    try {
+                        var uri = new URI(value);
+                        Util.getPlatform().openUri(uri);
+                    } catch (URISyntaxException uriSyntaxException) {
+                        LOGGER.error("Can't open url for {}", value, uriSyntaxException);
+                    }
+                    this.urlOpened = true;
+                    return false;
+                }
             }
         }
         return super.mouseClicked(pMouseX, pMouseY, pButton);
@@ -135,7 +160,7 @@ public class WelcomeMessageScreen extends Screen {
     public static WelcomeMessageScreen create(Screen screen) {
         return new WelcomeMessageScreen(
                 screen,
-                600,
+                200,
                 TITLE,
                 TEXT,
                 URL,
